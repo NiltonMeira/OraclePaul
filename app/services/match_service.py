@@ -1,7 +1,8 @@
 from app.database.connection import get_connection
+from psycopg2.extras import execute_batch
 
 
-def save_fixture(fixture):
+def save_fixtures(fixtures):
 
     conn = get_connection()
     cursor = conn.cursor()
@@ -21,16 +22,21 @@ def save_fixture(fixture):
     ON CONFLICT (fixture_id) DO NOTHING
     """
 
-    cursor.execute(query, (
-        fixture["fixture"]["id"],
-        fixture["league"]["id"],
-        fixture["league"]["season"],
-        fixture["teams"]["home"]["name"],
-        fixture["teams"]["away"]["name"],
-        fixture["goals"]["home"],
-        fixture["goals"]["away"],
-        fixture["fixture"]["date"]
-    ))
+    values = []
+
+    for fixture in fixtures:
+        values.append((
+            fixture["fixture"]["id"],
+            fixture["league"]["id"],
+            fixture["league"]["season"],
+            fixture["teams"]["home"]["name"],
+            fixture["teams"]["away"]["name"],
+            fixture["goals"]["home"],
+            fixture["goals"]["away"],
+            fixture["fixture"]["date"]
+        ))
+
+    execute_batch(cursor, query, values)
 
     conn.commit()
     cursor.close()

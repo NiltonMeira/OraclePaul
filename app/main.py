@@ -1,20 +1,23 @@
 from app.api.api_client import get_fixtures
-from app.services.match_service import save_fixture
+from app.services.match_service import save_fixtures
 
 
 def run():
 
     league_id = 71  # Brasileirão
-    season = 2024
+    season = 2010
 
     data = get_fixtures(league_id, season)
 
-    fixtures = data["response"]
+    fixtures = data.get("response", [])
 
-    for fixture in fixtures:
-        save_fixture(fixture)
+    if not fixtures:
+        print("Nenhum jogo retornado da API")
+        return
 
-    print("Dados salvos com sucesso!")
+    save_fixtures(fixtures)
+
+    print(f"{len(fixtures)} jogos processados com sucesso!")
 
 
 if __name__ == "__main__":
